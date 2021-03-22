@@ -4,7 +4,7 @@
 \alias{reig.pro}
 \title{Compute randomized eigenvalue decomposition of a symmetric matrix using random projection}
 \usage{
-reig.pro(A, rank, p = 10, q = 2, dist = "normal", approA = FALSE)
+reig.pro(A, rank, p = 10, q = 2, dist = "normal", approA = FALSE, nthread = 1)
 }
 \arguments{
 \item{A}{Input data matrix of class "\code{dgCMatrix}". The matrix should be a symmetric matrix but not necessarily be the adjacency matrix of a network.}
@@ -39,7 +39,7 @@ columns (rows) of \code{A}. The classical eigen value decomposition is then perf
 matrix. The randomized eigen value decomposition of \code{A} are obtained by postprocessing.
 }
 \examples{
-
+set.seed(123)
 n <- 100
 rank <- 2
 clustertrue <- rep(1:rank, each = n/rank)

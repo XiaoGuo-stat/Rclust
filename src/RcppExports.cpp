@@ -95,6 +95,20 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// symspbin_power_prod
+NumericMatrix symspbin_power_prod(Rcpp::S4 A, NumericMatrix P, int q, int nthread);
+RcppExport SEXP _Rclust_symspbin_power_prod(SEXP ASEXP, SEXP PSEXP, SEXP qSEXP, SEXP nthreadSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::S4 >::type A(ASEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type P(PSEXP);
+    Rcpp::traits::input_parameter< int >::type q(qSEXP);
+    Rcpp::traits::input_parameter< int >::type nthread(nthreadSEXP);
+    rcpp_result_gen = Rcpp::wrap(symspbin_power_prod(A, P, q, nthread));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_Rclust_qr_Q", (DL_FUNC) &_Rclust_qr_Q, 1},
@@ -104,6 +118,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_Rclust_sparse_matrix_coords", (DL_FUNC) &_Rclust_sparse_matrix_coords, 2},
     {"_Rclust_spbin_power_prod", (DL_FUNC) &_Rclust_spbin_power_prod, 4},
     {"_Rclust_spbin_power_crossprod", (DL_FUNC) &_Rclust_spbin_power_crossprod, 4},
+    {"_Rclust_symspbin_power_prod", (DL_FUNC) &_Rclust_symspbin_power_prod, 4},
     {NULL, NULL, 0}
 };
 

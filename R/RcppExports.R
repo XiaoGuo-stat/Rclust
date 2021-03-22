@@ -61,3 +61,7 @@ spbin_power_crossprod <- function(coords, P, q = 0L, nthread = 1L) {
     .Call(`_Rclust_spbin_power_crossprod`, coords, P, q, nthread)
 }
 
+symspbin_power_prod <- function(A, P, q = 0L, nthread = 1L) {
+    .Call(`_Rclust_symspbin_power_prod`, A, P, q, nthread)
+}
+
