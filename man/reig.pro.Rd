@@ -7,7 +7,8 @@
 reig.pro(A, rank, p = 10, q = 2, dist = "normal", approA = FALSE, nthread = 1)
 }
 \arguments{
-\item{A}{Input data matrix of class "\code{dgCMatrix}". The matrix should be a symmetric matrix but not necessarily be the adjacency matrix of a network.}
+\item{A}{Input data matrix of class "\code{dgCMatrix}". The matrix is assumed to be binary,
+symmetric, and sparse, with zeros on the diagonal. Only the lower-triangular part is used.}
 
 \item{rank}{The target rank of the low-rank decomposition.}
 
@@ -20,6 +21,8 @@ reig.pro(A, rank, p = 10, q = 2, dist = "normal", approA = FALSE, nthread = 1)
 is \code{"normal"}.}
 
 \item{approA}{A logical variable indicating whether the approximated \code{A} is returned. Default is \code{FALSE}.}
+
+\item{nthread}{Maximum number of threads for specific computations that could be implemented in parallel. Default is 1.}
 }
 \value{
 \item{vectors}{The randomized \code{rank+p} eigen vectors.}

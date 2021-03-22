@@ -10,10 +10,8 @@
 #' columns (rows) of \code{A}. The classical eigen value decomposition is then performed on the smaller
 #' matrix. The randomized eigen value decomposition of \code{A} are obtained by postprocessing.
 #'
-#'
-#'
-#'
-#' @param A Input data matrix of class "\code{dgCMatrix}". The matrix should be a symmetric matrix but not necessarily be the adjacency matrix of a network.
+#' @param A Input data matrix of class "\code{dgCMatrix}". The matrix is assumed to be binary,
+#'          symmetric, and sparse, with zeros on the diagonal. Only the lower-triangular part is used.
 #' @param rank The target rank of the low-rank decomposition.
 #' @param p The oversampling parameter. It need to be a positive integer number. Default value is 10.
 #' @param q The power parameter. It need to be a positive integer number. Default value is 2.
@@ -21,6 +19,7 @@
 #'             \code{"unif"} (uniform distribution from -1 to 1), or \code{"rademacher"} (randemacher distribution). Default
 #'             is \code{"normal"}.
 #' @param approA A logical variable indicating whether the approximated \code{A} is returned. Default is \code{FALSE}.
+#' @param nthread Maximum number of threads for specific computations that could be implemented in parallel. Default is 1.
 #'
 #' @return \item{vectors}{The randomized \code{rank+p} eigen vectors.}
 #'         \item{values}{The \code{rank+p} eigen values.}
@@ -47,7 +46,6 @@
 #' reig.pro(A, rank)
 #'
 #' @export reig.pro
-#'
 #'
 reig.pro <- function(A, rank, p = 10, q = 2, dist = "normal", approA = FALSE, nthread = 1) {
     # Dim of input matrix
