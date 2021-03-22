@@ -31,8 +31,7 @@
 #' \emph{SIAM review, Vol. 53(2), 217-288}\cr
 #' \url{https://epubs.siam.org/doi/10.1137/090771806}\cr
 #'
-#' @examples
-#'
+#' @examples set.seed(123)
 #' n <- 100
 #' rank <- 2
 #' clustertrue <- rep(1:rank, each = n/rank)
@@ -50,14 +49,11 @@
 #' @export reig.pro
 #'
 #'
-reig.pro <- function(A, rank, p = 10, q = 2, dist = "normal", approA = FALSE) {
+reig.pro <- function(A, rank, p = 10, q = 2, dist = "normal", approA = FALSE, nthread = 1) {
     # Dim of input matrix
     n <- nrow(A)
 
-    # Get coordinates of nonzero elements
-    Acoord <- sparse_matrix_coords(A)
-
-	  # Set the reduced dimension
+    # Set the reduced dimension
     l <- round(rank) + round(p)
 
     # Generate a random test matrix O
@@ -69,35 +65,27 @@ reig.pro <- function(A, rank, p = 10, q = 2, dist = "normal", approA = FALSE) {
                 rademacher = matrix(sample(c(-1,1), (l*n), replace = TRUE, prob = c(0.5,0.5)), n, l),
                 stop("The sampling distribution is not supported!"))
 
-    # Build sketch matrix Y : Y = A * O
-	  Y <- spbin_power_prod(Acoord, O, q = 0)
+    # Build sketch matrix Y: Y = (A * A')^q * A * O = A^(2q+1) * O
+    Y <- symspbin_power_prod(A, O, q = q, nthread = nthread)
 
-    # Orthogonalize Y using QR decomposition: Y=QR
-    if( q > 0 ) {
-        for( i in 1:q ) {
-            Y <- qr_Q(Y)
-            Z <- spbin_power_crossprod(Acoord, Y, q = 0)
-            Z <- qr_Q(Z)
-            Y <- spbin_power_prod(Acoord, Z, q = 0)
-        }
-    }
+    # Orthogonalize Y using QR decomposition: Y = Q * R
     Q <- qr_Q(Y)
 
     # Obtain the smaller matrix B := Q' * A * Q
-    B <- crossprod(spbin_power_crossprod(Acoord, Q, q = 0), Q)
+    B <- crossprod(symspbin_power_prod(A, Q, q = 0, nthread = nthread), Q)
 
-	  # Compute the eigenvalue decomposition of B and recover the approximated eigenvectors of A
-	  fit <- eigen(B, symmetric = TRUE)
-	  o <- order(abs(fit$values),decreasing=T)
-	  vectors <- Q %*% fit$vectors[,o]
-	  values <- fit$values[o]
+    # Compute the eigenvalue decomposition of B and recover the approximated eigenvectors of A
+    fit <- eigen(B, symmetric = TRUE)
+    o <- order(abs(fit$values), decreasing = TRUE)
+    vectors <- Q %*% fit$vectors[, o]
+    values <- fit$values[o]
 
-	  # Output the result
-	  if(approA == FALSE) {
-	      list(vectors = vectors, values =values)
-	  } else {
-	      # Compute the approximated matrix of the original A
-	      C  <- Q %*% B %*% t(Q)
-	      list(vectors = vectors, values = values, approA = C)
-	  }
+    # Output the result
+    if(approA == FALSE) {
+        list(vectors = vectors, values = values)
+    } else {
+        # Compute the approximated matrix of the original A
+        C <- Q %*% B %*% t(Q)
+        list(vectors = vectors, values = values, approA = C)
+    }
 }

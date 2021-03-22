@@ -5,6 +5,7 @@ using Rcpp::List;
 using Rcpp::NumericMatrix;
 using Rcpp::IntegerVector;
 
+// res = val[idx[0]] + val[idx[1]] + ... + val[idx[n-1]]
 #ifdef __AVX2__
 #include <immintrin.h>
 inline double gather_sum(const double* val, const int* idx_start, int n)
