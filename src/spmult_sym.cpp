@@ -78,7 +78,11 @@ inline void symspbin_prod(const MapSpMat& mat, const double* v, double* res)
     for(int j = 0; j < n; j++)
     {
         const int* Ai_start = inner + outer[j];
-        double tprod = gather_and_scatter(v, Ai_start, v[j], res, outer[j + 1] - outer[j]);
+        const int* Ai_end = inner + outer[j + 1];
+        // Move to the first element in the strict lower-triangular part
+        while((*Ai_start <= j) && (Ai_start < Ai_end))
+            Ai_start++;
+        double tprod = gather_and_scatter(v, Ai_start, v[j], res, Ai_end - Ai_start);
         res[j] += tprod;
     }
 }
