@@ -43,14 +43,21 @@
 #' @export reig.sam
 #'
 #'
-reig.sam <- function(A, P, use_lower = TRUE, k, tol = 1e-5, ...){
+reig.sam <- function(A, P, use_lower = TRUE, k, tol = 1e-5, abs = FALSE, ...){
   #Obtain the sparsified matrix
   rA <- rsample_sym (A, P, use_lower = use_lower)/P
 
   #Find the leading eigen vectors of the sparsified matrix
+  if(abs == TRUE){
   partialeig <- svds (rA, k = k, opts = list(tol = tol), ...)
   vectors <- partialeig$u
   values <- partialeig$d
+  }else{
+    partialeig <- eigs_sym (rA, k = k, opts = list(tol = tol), ...)
+    vectors <- partialeig$vectors
+    values <- partialeig$values
+  }
+
 
   #Output the result
   list(vectors = vectors, values = values, sparA = rA)

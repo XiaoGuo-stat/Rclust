@@ -47,7 +47,7 @@
 #'
 #' @export reig.pro
 #'
-reig.pro <- function(A, rank, p = 10, q = 2, dist = "normal", approA = FALSE, nthread = 1) {
+reig.pro <- function(A, rank, p = 10, q = 2, dist = "normal", approA = FALSE, nthread = 1, abs = FALSE) {
     # Dim of input matrix
     n <- nrow(A)
 
@@ -74,10 +74,15 @@ reig.pro <- function(A, rank, p = 10, q = 2, dist = "normal", approA = FALSE, nt
 
     # Compute the eigenvalue decomposition of B and recover the approximated eigenvectors of A
     fit <- eigen(B, symmetric = TRUE)
+
+    if(abs == TRUE) {
     o <- order(abs(fit$values), decreasing = TRUE)
     vectors <- Q %*% fit$vectors[, o]
     values <- fit$values[o]
-
+    } else{
+          vectors <- Q %*% fit$vectors[, 1:K]
+          values <- fit$values[1:K]
+    }
     # Output the result
     if(approA == FALSE) {
         list(vectors = vectors, values = values)
