@@ -11,7 +11,7 @@
 #' matrix. The randomized eigen value decomposition of \code{A} are obtained by postprocessing.
 #'
 #' @param A Input data matrix of class "\code{dgCMatrix}". The matrix is assumed to be binary,
-#'          symmetric, and sparse, with zeros on the diagonal. Only the lower-triangular part is used.
+#'          symmetric, and sparse, with zeros on the diagonal.
 #' @param rank The target rank of the low-rank decomposition.
 #' @param p The oversampling parameter. It need to be a positive integer number. Default value is 10.
 #' @param q The power parameter. It need to be a positive integer number. Default value is 2.

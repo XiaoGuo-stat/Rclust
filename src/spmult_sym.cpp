@@ -4,69 +4,95 @@ using Rcpp::List;
 using Rcpp::NumericMatrix;
 using Rcpp::IntegerVector;
 
+// res = x[ind[0]] + x[ind[1]] + ... + x[ind[n-1]]
 #ifdef __AVX2__
 #include <immintrin.h>
-// Array x, indices ind = (i1, ..., in), array y
-// (1) Compute r = x[i1] + ... + x[in]
-// (2) Do y[i1] += c, ..., y[in] += c
-// (3) On exit the ind pointer points to the end of ind
-inline double gather_and_scatter(
-    const double* x, const int*& ind, double c, double* y, int n
-)
+inline double gather_sum(const double* x, const int* ind, int n)
 {
-    // Process 4 values at one time
-    constexpr int simd_size = 4;
-    const int* ind_simd_end = ind + (n - n % simd_size);
-    const int* ind_end = ind + n;
+    constexpr int simd_size = 8;
+    const int* idx_end = ind + n;
+    // const int* idx_simd_end = ind + (n - n % simd_size);
+    // n % 8 == n & 7, see https://stackoverflow.com/q/3072665
+    const int* idx_simd_end = idx_end - (n & (simd_size - 1));
 
-    __m256d rs = _mm256_set1_pd(0.0);
-    for(; ind < ind_simd_end; ind += simd_size)
+    __m256d resv = _mm256_set1_pd(0.0);
+    for(; ind < idx_simd_end; ind += simd_size)
     {
-        // 4 indices in a packet
-        __m128i inds = _mm_loadu_si128((__m128i*) ind);
-        // 4 x values in a packet
-        __m256d xs = _mm256_i32gather_pd(x, inds, sizeof(double));
-        // Add values
-        rs += xs;
-        // Scattering
+        __m128i idx1 = _mm_loadu_si128((__m128i*) ind);
+        __m256d v1 = _mm256_i32gather_pd(x, idx1, sizeof(double));
+        __m128i idx2 = _mm_loadu_si128((__m128i*) (ind + 4));
+        __m256d v2 = _mm256_i32gather_pd(x, idx2, sizeof(double));
+        resv += (v1 + v2);
+    }
+
+    double res = 0.0;
+    for(; ind < idx_end; ind++)
+        res += x[*ind];
+
+    return res + resv[0] + resv[1] + resv[2] + resv[3];
+}
+#else
+inline double gather_sum(const double* x, const int* ind, int n)
+{
+    double res = 0.0;
+    const int* idx_end = ind + n;
+    for(; ind < idx_end; ind++)
+        res += x[*ind];
+    return res;
+}
+#endif
+
+// y[ind[0]] += c, y[ind[1]] += c, ..., y[ind[n-1]] += c
+inline void scatter(double* y, const int* ind, int n, double c)
+{
+    constexpr int simd_size = 8;
+    const int* idx_end = ind + n;
+    // n % 8 == n & 7, see https://stackoverflow.com/q/3072665
+    const int* idx_simd_end = idx_end - (n & (simd_size - 1));
+
+    for(; ind < idx_simd_end; ind += simd_size)
+    {
         y[ind[0]] += c;
         y[ind[1]] += c;
         y[ind[2]] += c;
         y[ind[3]] += c;
+        y[ind[4]] += c;
+        y[ind[5]] += c;
+        y[ind[6]] += c;
+        y[ind[7]] += c;
     }
 
-    double r = 0.0;
-    for(; ind < ind_end; ind++)
-    {
-        r += x[*ind];
+    for(; ind < idx_end; ind++)
         y[*ind] += c;
-    }
-    return r + rs[0] + rs[1] + rs[2] + rs[3];
 }
-#else
-inline double gather_and_scatter(
-    const double* x, const int*& ind, double c, double* y, int n
-)
-{
-    const int* ind_end = ind + n;
-    double r = 0.0;
-    for(; ind < ind_end; ind++)
-    {
-        r += x[*ind];
-        y[*ind] += c;
-    }
-    return r;
-}
-#endif
 
 using SpMat = Eigen::SparseMatrix<double>;
 using MapSpMat = Eigen::Map<SpMat>;
 
 // mat is a binary symmetric sparse matrix of class dgCMatrix,
-// with only lower-triangular part. The diagonal elements are all zero
+// with zeros on the diagonal.
 //
-// res = mat * v
-inline void symspbin_prod(const SpMat& mat, const double* v, double* res)
+// res = mat * v = mat' * v
+inline void symspbin_prod(const MapSpMat& mat, const double* v, double* res)
+{
+    const int n = mat.rows();
+
+    const int* inner = mat.innerIndexPtr();
+    const int* outer = mat.outerIndexPtr();
+    for(int j = 0; j < n; j++)
+    {
+        const int Ai_len = outer[j + 1] - outer[j];
+        const int* Ai_start = inner + outer[j];
+        const int* Ai_end = Ai_start + Ai_len;
+        res[j] = gather_sum(v, Ai_start, Ai_len);
+    }
+}
+
+// mat is a binary symmetric sparse matrix of class dgCMatrix,
+// with zeros on the diagonal.
+//
+// res = mat^2 * v
+inline void symspbin_doubleprod(const MapSpMat& mat, const double* v, double* res)
 {
     const int n = mat.rows();
 
@@ -77,10 +103,10 @@ inline void symspbin_prod(const SpMat& mat, const double* v, double* res)
     const int* outer = mat.outerIndexPtr();
     for(int j = 0; j < n; j++)
     {
+        const int Ai_len = outer[j + 1] - outer[j];
         const int* Ai_start = inner + outer[j];
-        const int* Ai_end = inner + outer[j + 1];
-        double tprod = gather_and_scatter(v, Ai_start, v[j], res, Ai_end - Ai_start);
-        res[j] += tprod;
+        const double c = gather_sum(v, Ai_start, Ai_len);
+        scatter(res, Ai_start, Ai_len, c);
     }
 }
 
@@ -88,7 +114,7 @@ inline void symspbin_prod(const SpMat& mat, const double* v, double* res)
 // [[Rcpp::export]]
 NumericMatrix symspbin_power_prod(Rcpp::S4 A, NumericMatrix P, int q = 0, int nthread = 1)
 {
-    SpMat mat = Rcpp::as<MapSpMat>(A).triangularView<Eigen::StrictlyLower>();
+    MapSpMat mat = Rcpp::as<MapSpMat>(A);
     const int n = P.nrow();
     const int k = P.ncol();
     NumericMatrix res(Rcpp::no_init_matrix(n, k));
@@ -113,8 +139,8 @@ NumericMatrix symspbin_power_prod(Rcpp::S4 A, NumericMatrix P, int q = 0, int nt
         // Power iterations
         for(int i = 0; i < q; i++)
         {
-            symspbin_prod(mat, r, w);
-            symspbin_prod(mat, w, r);
+            symspbin_doubleprod(mat, r, w);
+            std::copy(w, w + n, r);
         }
     }
 
