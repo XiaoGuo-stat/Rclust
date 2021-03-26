@@ -4,7 +4,7 @@
 \alias{reig.sam}
 \title{Compute randomized eigenvalue decomposition of a matrix using random sampling}
 \usage{
-reig.sam(A, P, use_lower = TRUE, k, tol = 1e-05, ...)
+reig.sam(A, P, use_lower = TRUE, k, tol = 1e-05, abs = FALSE, ...)
 }
 \arguments{
 \item{A}{An input sparse data matrix of type "dgCMatrix". \code{A} is not necessarily a symmetric matrix, see the parameter \code{use_lower}.}

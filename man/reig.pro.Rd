@@ -4,11 +4,20 @@
 \alias{reig.pro}
 \title{Compute randomized eigenvalue decomposition of a symmetric matrix using random projection}
 \usage{
-reig.pro(A, rank, p = 10, q = 2, dist = "normal", approA = FALSE, nthread = 1)
+reig.pro(
+  A,
+  rank,
+  p = 10,
+  q = 2,
+  dist = "normal",
+  approA = FALSE,
+  nthread = 1,
+  abs = FALSE
+)
 }
 \arguments{
 \item{A}{Input data matrix of class "\code{dgCMatrix}". The matrix is assumed to be binary,
-symmetric, and sparse, with zeros on the diagonal. Only the lower-triangular part is used.}
+symmetric, and sparse, with zeros on the diagonal.}
 
 \item{rank}{The target rank of the low-rank decomposition.}
 
