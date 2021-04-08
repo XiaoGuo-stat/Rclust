@@ -1,52 +1,47 @@
 ## Randomized Spectral Clustering for Large-Scale Networks
 ### Introduction
 
-**RandClust** performs spectral clustering for large-scale directed and undirected networks using
+**Rclust** performs spectral clustering for large-scale undirected networks using
 randomization techniques including the random projection and the random sampling. Specifically, the
-random-projection-based SVD (eigendecomposition) or the random-sampling-based SVD (eigendecomposition) is first computed for the 
-adjacency matrix of the directed (undirected) network. The k-means or the spherical k-median is 
-then performed on the randomized singular (eigen) vectors. 
+random-projection-based eigendecomposition or the random-sampling-based eigendecomposition is first computed for the 
+adjacency matrix of the undirected network. The k-means is 
+then performed on the randomized eigen vectors. 
 
 ### Examples
 
-We use the a real network `scoEpinions` to illustrate. The `scoEpinions` object is a sparse matrix 
-representing the adjacency matrix of the directed Epinions social network. The largest connected 
-component of the original network is collected. There is 75877 nodes and 508836 edges.
+We use the a real network `youtubeNetwork` to illustrate. The `youtubeNetwork` object is a sparse matrix 
+representing the adjacency matrix of the undirected youtube social network. There is 1157828 nodes and 2987624 edges.
 
 ```r
-data(scoEpinions)
-A <- scoEpinions 
+data(youtubeNetwork)
+A <- youtubeNetwork
 ```
 
-The random-projection-based SVD of `A` can be computed via
+The random-projection-based eigendecomposition of `A` can be computed via
 
 ```r
-rsvd.pro(A, rank = 3, p = 10, q = 2, dist = "normal", nthread = 1)
+reig.pro(A, rank = 7, p = 10, q = 2, dist = "normal", 
 ```
 
-The random-sampling-based SVD of `A` can be computed via
+The random-sampling-based eigendecomposition of `A` can be computed via
 
 ```r
-rsvd.sam(A, P = 0.7, nu = 3, nv = 2)
+reig.sam(A, P, use_lower = TRUE, k = 7, tol = 1e-05)
 ```
 
-The corresponding random-projection-based and random-sampling-based spectral co-clustering can be
+The corresponding random-projection-based and random-sampling-based spectral clustering can be
 performed respectively using 
 
 ```r
-rcoclust(A, method = "rsample", ky = 3, kz = 2, P = 0.7, normalize = FALSE)
-rcoclust(A, method = "rproject", ky = 3, kz =2, normalize = TRUE)
+rclust(A, method = "rproject", k = 7, rank = 7, p = 10, q = 2, dist = "normal")
+rclust(A, method = "rsample", k = 7, rank = 7, P = 0.7)
 ```
 
-The package also provides a function for sampling a sparse matrix with given probability:
+The package also provides a function for sampling a sparse symmetric matrix with given probability:
 
 ```r
-rsample(A, P = 0.5)
+rsample_sym(A, P = 0.5)
 ```
-
-Similar to directed networks, undirected networks could be handled using `reig.pro`,  `reig.sam`,
-`rclust`, `rsample_sym`. An undirected network `youtubeNetwork` is also included. 
-
 
 
 
