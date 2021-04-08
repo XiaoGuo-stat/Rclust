@@ -2,7 +2,7 @@
 % Please edit documentation in R/reig.pro.R
 \name{reig.pro}
 \alias{reig.pro}
-\title{Compute randomized eigenvalue decomposition of a symmetric matrix using random projection}
+\title{Compute randomized eigenvalue decomposition of the adjacency matrix of undirected networks using random projection}
 \usage{
 reig.pro(
   A,
@@ -32,6 +32,9 @@ is \code{"normal"}.}
 \item{approA}{A logical variable indicating whether the approximated \code{A} is returned. Default is \code{FALSE}.}
 
 \item{nthread}{Maximum number of threads for specific computations that could be implemented in parallel. Default is 1.}
+
+\item{abs}{A logical variable indicating whether the \code{rank+p} eigen values should be largest in absolute value.
+Default is \code{FALSE}, indicating that the eigen values are largest in value.}
 }
 \value{
 \item{vectors}{The randomized \code{rank+p} eigen vectors.}
@@ -39,13 +42,13 @@ is \code{"normal"}.}
         \item{approA}{The approximated data matrix if requested.}
 }
 \description{
-Compute the randomized eigenvalue decomposition of a symmetric matrix by random projection.
+Compute the randomized eigenvalue decomposition of an adjacency matrix (0-1 coded) by random projection.
 The randomized eigen vectors and eigen values are computed. Can deal with very large
 data matrix.
 }
 \details{
-This function computes the randomized eigen value decomposition of a data matrix using the random
-projection scheme. The data matrix \code{A} is symmetric. It is first compressed to a
+This function computes the randomized eigen value decomposition of an adjacency matrix using the random
+projection scheme. The data matrix \code{A} is symmetric and binary. It is first compressed to a
 smaller matrix with its columns (rows) being the linear combinations of the
 columns (rows) of \code{A}. The classical eigen value decomposition is then performed on the smaller
 matrix. The randomized eigen value decomposition of \code{A} are obtained by postprocessing.

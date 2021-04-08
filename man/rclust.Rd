@@ -8,9 +8,11 @@ rclust(
   A,
   method = c("rsample", "rproject"),
   k,
+  rank,
   p = 10,
   q = 2,
   dist = "normal",
+  abs = FALSE,
   P,
   iter.max = 50,
   nstart = 10,
@@ -18,13 +20,15 @@ rclust(
 )
 }
 \arguments{
-\item{A}{The adjacency matrix of an undirected network with type "dgCMatrix".}
+\item{A}{The adjacency matrix of an undirected network (binary and symmetric) with type "dgCMatrix".}
 
 \item{method}{The method for computing the randomized eigendecomposition. Random sampling-based eigendecomposition
 is implemented if \code{method="rsample"}, and random projection-based
 eigendecomposition is implemented if \code{method="rproject"}.}
 
 \item{k}{The number of target clusters.}
+
+\item{rank}{The number of target rank.}
 
 \item{p}{The oversampling parameter in the random projection scheme. Requested only
 if \code{method="rproject"}. Default is 10.}
@@ -35,6 +39,9 @@ if \code{method="rproject"}. Default is 10.}
 \item{dist}{The distribution of the entry of the random test matrix in the random
 projection scheme. Requested only if \code{method="rproject"}. Default
 is \code{"normal"}.}
+
+\item{abs}{A logical variable indicating whether the eigen values should be largest in absolute value.
+Default is \code{FALSE}, indicating that the eigen values are largest in value.}
 
 \item{P}{The sampling probability in the random sampling scheme. Requested only
 if \code{method="rsample"}.}
@@ -49,8 +56,8 @@ Default is 50.}
 \value{
 \item{cluster}{The cluster vector (from \code{1:k}) with the numbers indicating which
              cluster each node is assigned.}
-        \item{rvectors}{The randomized \code{k} eigen vectors computed by
-             \code{\link[RandClust]{reig.pro}} or \code{\link[RandClust]{reig.sam}}.}
+        \item{rvectors}{The randomized \code{rank} eigen vectors computed by
+             \code{\link[Rclust]{reig.pro}} or \code{\link[Rclust]{reig.sam}}.}
 }
 \description{
 Randomized spectral clustering for undirected networks. The clusters are computed using two random schemes, namely, the random sampling
@@ -74,10 +81,10 @@ for(i in 1: (n-1)) {
     }
 }
 A <- as(A, "dgCMatrix")
-rclust(A, method = "rsample", k = k, P = 0.7)
+rclust(A, method = "rsample", k = k, rank = k, P = 0.7)
 
 
 }
 \seealso{
-\code{\link[RandClust]{reig.pro}}, \code{\link[RandClust]{reig.sam}}.
+\code{\link[Rclust]{reig.pro}}, \code{\link[Rclust]{reig.sam}}.
 }

@@ -11,11 +11,12 @@
 #'
 #'
 #'
-#' @param A The adjacency matrix of an undirected network with type "dgCMatrix".
+#' @param A The adjacency matrix of an undirected network (binary and symmetric) with type "dgCMatrix".
 #' @param method The method for computing the randomized eigendecomposition. Random sampling-based eigendecomposition
 #'               is implemented if \code{method="rsample"}, and random projection-based
 #'               eigendecomposition is implemented if \code{method="rproject"}.
 #' @param k The number of target clusters.
+#' @param rank The number of target rank.
 #' @param p The oversampling parameter in the random projection scheme. Requested only
 #'          if \code{method="rproject"}. Default is 10.
 #' @param q The power parameter in the random projection scheme. Requested only if
@@ -25,6 +26,8 @@
 #'             is \code{"normal"}.
 #' @param P The sampling probability in the random sampling scheme. Requested only
 #'          if \code{method="rsample"}.
+#' @param abs A logical variable indicating whether the eigen values should be largest in absolute value.
+#'            Default is \code{FALSE}, indicating that the eigen values are largest in value.
 #' @param iter.max Maximum number of iterations in the \code{\link[stats]{kmeans}}.
 #'                 Default is 50.
 #' @param nstart The number of random sets in \code{\link[stats]{kmeans}}. Default is 10.
@@ -32,10 +35,10 @@
 #'
 #' @return \item{cluster}{The cluster vector (from \code{1:k}) with the numbers indicating which
 #'              cluster each node is assigned.}
-#'         \item{rvectors}{The randomized \code{k} eigen vectors computed by
-#'              \code{\link[RandClust]{reig.pro}} or \code{\link[RandClust]{reig.sam}}.}
+#'         \item{rvectors}{The randomized \code{rank} eigen vectors computed by
+#'              \code{\link[Rclust]{reig.pro}} or \code{\link[Rclust]{reig.sam}}.}
 #' @export rclust
-#' @seealso \code{\link[RandClust]{reig.pro}}, \code{\link[RandClust]{reig.sam}}.
+#' @seealso \code{\link[Rclust]{reig.pro}}, \code{\link[Rclust]{reig.sam}}.
 #' @examples
 #' n <- 100
 #' k <- 2
@@ -48,20 +51,20 @@
 #'     }
 #' }
 #' A <- as(A, "dgCMatrix")
-#' rclust(A, method = "rsample", k = k, P = 0.7)
+#' rclust(A, method = "rsample", k = k, rank = k, P = 0.7)
 #'
 #'
-rclust <- function(A, method = c("rsample", "rproject"), k, p = 10, q = 2, dist = "normal", P, iter.max = 50, nstart = 10, ...) {
+rclust <- function(A, method = c("rsample", "rproject"), k, rank, p = 10, q = 2, dist = "normal", abs = FALSE, P, iter.max = 50, nstart = 10, ...) {
 
   #Compute the randomized eigen vectors
   if(method == "rsample"){
-    sameig <- reig.sam (A = A, P = P, k = k, ...)
+    sameig <- reig.sam (A = A, P = P, k = rank, abs = abs, ...)
     A.u <- sameig$vectors
   }
 
   if(method == "rproject"){
-    projeig <- reig.pro (A = A, rank = k, p = p, q = q, dist = dist, ...)
-    A.u <- projeig$vectors[, 1 : k]
+    projeig <- reig.pro (A = A, rank = rank, p = p, q = q, dist = dist, abs = abs, ...)
+    A.u <- projeig$vectors[, 1 : rank]
   }
 
 
