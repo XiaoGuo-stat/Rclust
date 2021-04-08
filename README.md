@@ -21,21 +21,21 @@ A <- youtubeNetwork
 The random-projection-based eigendecomposition of `A` can be computed via
 
 ```r
-reig.pro(A, rank = 7, p = 10, q = 2, dist = "normal", nthread = 2)
+reig.pro(A, rank = 2, p = 10, q = 2, dist = "normal", nthread = 2)
 ```
 
 The random-sampling-based eigendecomposition of `A` can be computed via
 
 ```r
-reig.sam(A, P, use_lower = TRUE, k = 7, tol = 1e-05)
+reig.sam(A, P = 0.7, use_lower = TRUE, k = 2, tol = 1e-05)
 ```
 
 The corresponding random-projection-based and random-sampling-based spectral clustering can be
 performed respectively using 
 
 ```r
-rclust(A, method = "rproject", k = 7, rank = 7, p = 10, q = 2, dist = "normal")
-rclust(A, method = "rsample", k = 7, rank = 7, P = 0.7)
+rclust(A, method = "rproject", k = 3, rank = 2, p = 10, q = 2, dist = "normal")
+rclust(A, method = "rsample", k = 3, rank = 2, P = 0.7)
 ```
 
 The package also provides a function for sampling a sparse symmetric matrix with given probability:
