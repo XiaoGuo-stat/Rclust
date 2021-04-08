@@ -13,6 +13,7 @@ We use the a real network `youtubeNetwork` to illustrate. The `youtubeNetwork` o
 representing the adjacency matrix of the undirected youtube social network. There is 1157828 nodes and 2987624 edges.
 
 ```r
+library(Rclust)
 data(youtubeNetwork)
 A <- youtubeNetwork
 ```
