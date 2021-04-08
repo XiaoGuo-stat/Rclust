@@ -21,7 +21,7 @@ A <- youtubeNetwork
 The random-projection-based eigendecomposition of `A` can be computed via
 
 ```r
-reig.pro(A, rank = 7, p = 10, q = 2, dist = "normal", 
+reig.pro(A, rank = 7, p = 10, q = 2, dist = "normal", nthread = 2)
 ```
 
 The random-sampling-based eigendecomposition of `A` can be computed via
