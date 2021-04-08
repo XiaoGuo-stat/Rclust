@@ -1,4 +1,4 @@
-## Randomized Spectral Clustering for Large-Scale Networks
+## Randomized Spectral Clustering for Large-Scale Undirected Networks
 ### Introduction
 
 **Rclust** performs spectral clustering for large-scale undirected networks using
